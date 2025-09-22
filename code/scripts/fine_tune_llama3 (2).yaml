@@ -1,0 +1,49 @@
+base_model: meta-llama/Llama-3.3-70B-Instruct
+model_type: AutoModelForCausalLM
+tokenizer_type: AutoTokenizer
+
+load_in_4bit: true
+strict: false
+trust_remote_code: true
+
+datasets:
+  - path: ../../data/model_training/counterspeech_gpt4o_training.jsonl
+    type: alpaca
+
+dataset_prepared_path: last_run_prepared
+
+val_set_size: 0.1
+
+adapter: qlora
+lora_r: 64
+lora_alpha: 16
+lora_dropout: 0.05
+lora_target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+sequence_len: 8192
+
+micro_batch_size: 1
+gradient_accumulation_steps: 16
+num_epochs: 3
+optimizer: adamw_bnb_8bit
+
+lr_scheduler: cosine
+learning_rate: 2e-5
+
+logging_steps: 10
+save_steps: 100
+eval_steps: 50
+save_total_limit: 2
+output_dir: path_to_logging_output
+
+gradient_checkpointing: true
+use_flash_attention_2: true
+
+deepspeed: ./deepspeed_configs/zero3.json
